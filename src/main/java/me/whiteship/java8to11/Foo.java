@@ -5,52 +5,39 @@ import java.util.function.*;
 public class Foo {
 
 	public static void main(String[] args) {
-		// 익명 내부 클래스 anonymous inner class
-		RunSomething runSomething = new RunSomething() {
+		Supplier<Integer> get10 = () -> 10;
+		BiFunction<Integer, Integer, Integer> sum = (a, b) -> a + b;
+		BinaryOperator<Integer> sum2 = (a, b) -> a + b;
+		BinaryOperator<Integer> sum3 = (Integer a, Integer b) -> a + b;
+
+		Foo foo = new Foo();
+		foo.run();
+	}
+
+	private void run() {
+		final int baseNumber = 10; //사실상 final인 경우 생략 가능
+
+		// 로컬 클래스
+		class LocalClass {
+			void printBaseNumber() {
+				int baseNumber = 11;
+				System.out.println(baseNumber); //11
+			}
+		}
+
+		// 익명 클래스
+		Consumer<Integer> integerConsumer = new Consumer<Integer>() {
 			@Override
-			public void doIt() {
-				System.out.println("Hello");
+			public void accept(Integer baseNumber) {
+				System.out.println(baseNumber);
 			}
 		};
 
-		RunSomething runSomething2 = () -> System.out.println("Hello");
-
-		RunSomething runSomething3 = () -> {
-			System.out.println("Hello");
-			System.out.println("Lambda");
+		// 람다
+		IntConsumer printInt = (i) -> {
+			System.out.println(i + baseNumber);
 		};
 
-		runSomething.doIt();
-
-		RunSomething2 runSomething4 = (number) -> number +10;
-
-		System.out.println(runSomething4.doIt(1));
-		System.out.println(runSomething4.doIt(1));
-
-		System.out.println(runSomething4.doIt(2));
-		System.out.println(runSomething4.doIt(2));
-
-		Plus10 plus10 = new Plus10();
-		System.out.println(plus10.apply(1));
-
-//		Function<Integer, Integer> plus10_2 = (i) -> i + 10;
-		UnaryOperator<Integer> plus10_2 = (i) -> i + 10; //입력과 결과 값이 같은 경우
-		System.out.println(plus10_2.apply(1));
-
-		Function<Integer, Integer> multiply2 = (i) -> i * 2;
-
-		System.out.println(plus10.compose(multiply2).apply(2)); //multiply2 실행 후 plus10 실행
-		System.out.println(plus10.andThen(multiply2).apply(2)); //plus10 후 multiply2 실행
-
-		Consumer<Integer> printT = (i) -> System.out.println(i);
-		printT.accept(10);
-
-		Supplier<Integer> get10 = () -> 10;
-		System.out.println(get10.get());
-
-		//조합 가능
-		Predicate<String> startsWithLee = (s) -> s.startsWith("Lee");
-		Predicate<Integer> isEven = (i) -> i % 2 == 0;
-
+		printInt.accept(10);
 	}
 }
