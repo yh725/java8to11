@@ -1,7 +1,6 @@
 package me.whiteship.java8to11;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -9,35 +8,47 @@ import java.util.function.UnaryOperator;
 public class App {
 
 	public static void main(String[] args) {
-		Function<Integer, String> intToString = (i) -> "number";
+		Foo2 foo = new DefaultFoo("Lee");
+		foo.printName();
+		foo.printNameUpperCase();
 
-		UnaryOperator<String> hi = (s) -> "hi " + s;
-		UnaryOperator<String> hi2 = Greeting::hi;
+		Foo2.printAnything();
 
-		Greeting greeting = new Greeting();
-		UnaryOperator<String> hello = greeting::hello;
-		System.out.println(hello.apply("Lee"));
+		List<String> name = new ArrayList<>();
+		name.add("lee");
+		name.add("whiteship");
+		name.add("foo");
 
-		Supplier<Greeting> newGreeting = Greeting::new;
-		Greeting greeting2 = newGreeting.get();
+		System.out.println("=====");
 
-		Function<String, Greeting> leeGreeting
-				= Greeting::new;
+		name.forEach(System.out::println);
 
-		Greeting lee = leeGreeting.apply("lee");
-		System.out.println(lee.getName());
+		for (String n : name) {
+			System.out.println(n);
+		}
 
-		Supplier<Greeting> newGreeting2 = Greeting::new;
+		System.out.println("=====");
 
-		String[] names = {"lee", "whiteship", "toby"};
-		Arrays.sort(names, new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				return 0;
-			}
-		});
+		Spliterator<String> spliterator = name.spliterator();
+		Spliterator<String> spliterator1 = spliterator.trySplit();
+		while (spliterator.tryAdvance(System.out::println));
+		System.out.println("=====");
+		while (spliterator1.tryAdvance(System.out::println));
 
-		Arrays.sort(names, (o1, o2) -> 0);
-		Arrays.sort(names, String::compareToIgnoreCase);
+		long l = name.stream().map(String::toUpperCase)
+				.filter(s -> s.startsWith("L"))
+				.count();
+
+		System.out.println(l);
+
+//		name.removeIf(s -> s.startsWith("l"));
+
+		name.sort(String::compareToIgnoreCase);
+		name.forEach(System.out::println);
+
+		Comparator<String> compareToIgnoreCase = String::compareToIgnoreCase;
+		name.sort(compareToIgnoreCase.reversed());
+
+		name.forEach(System.out::println);
 	}
 }
