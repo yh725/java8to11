@@ -1,88 +1,99 @@
 package me.whiteship.java8to11;
 
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class App {
 
-	public static void main(String[] args) throws InterruptedException {
-		Date date = new Date();
-//		Calendar calendar = new GregorianCalendar();
-//		SimpleDateFormat dateFormat = new SimpleDateFormat();
+	public static void main(String[] args) {
+//		System.out.println(Thread.currentThread().getName());
+		MyThread myThread = new MyThread();
+		myThread.start();
 
-		long time = date.getTime();
-		System.out.println(date);
-		System.out.println(time);
+		System.out.println("Hello: " + Thread.currentThread().getName());
 
-		Thread.sleep(1000 * 3);
-		Date after3Seconds = new Date();
-		System.out.println(after3Seconds);
-		after3Seconds.setTime(time);
-		System.out.println(after3Seconds);
+/*
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				System.out.println("Thread Runnable: " + Thread.currentThread().getName());
+			}
+		});
+*/
+		Thread thread = new Thread(() -> {
+/*
+			try {
+				Thread.sleep(1000L);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+*/
+			while (true) {
+				System.out.println("Thread Runnable: " + Thread.currentThread().getName());
+				try {
+					Thread.sleep(1000L);
+				} catch (InterruptedException e) {
+					System.out.println("exit!");
+					return;
+				}
+			}
+//			System.out.println("Thread Runnable: " + Thread.currentThread().getName());
+		});
+		thread.start();
 
-		Calendar leeBirthDay = new GregorianCalendar(1990, Calendar.JULY, 25);
-		System.out.println(leeBirthDay.getTime());
-		leeBirthDay.add(Calendar.DAY_OF_YEAR, 1);
-		System.out.println(leeBirthDay.getTime());
+		System.out.println("Hello2: " + Thread.currentThread().getName());
+//		Thread.sleep(3000L);
+		thread.interrupt();
 
-		Instant instant = Instant.now(); // 기준시 UTC, GMT
-		System.out.println(instant);
-		System.out.println(instant.atZone(ZoneId.of("UTC")));
+		Thread thread2 = new Thread(() -> {
+			System.out.println("Thread Runnable2: " + Thread.currentThread().getName());
+			try {
+				Thread.sleep(3000L);
+			} catch (InterruptedException e) {
+				throw new IllegalStateException(e);
+			}
+		});
+		thread2.start();
+		try {
+			thread2.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println(thread2 + " is finished");
 
-		ZoneId zone = ZoneId.systemDefault();
-		System.out.println(zone);
-		ZonedDateTime zonedDateTime = instant.atZone(zone);
-		System.out.println(zonedDateTime);
+/*
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.submit(() -> {
+			System.out.println("Thread ExecutorService: " + Thread.currentThread().getName());
+		});
+*/
 
-		LocalDateTime now = LocalDateTime.now();
-		System.out.println(now);
+		ExecutorService executorService = Executors.newFixedThreadPool(2);
+		executorService.submit(getRunnable("Thread ExecutorService: "));
+		executorService.submit(getRunnable("Thread ExecutorService2: "));
+		executorService.submit(getRunnable("Thread ExecutorService3: "));
+		executorService.submit(getRunnable("Thread ExecutorService4: "));
+		executorService.submit(getRunnable("Thread ExecutorService5: "));
 
-		LocalDateTime birthDay = LocalDateTime.of(1990, Month.JULY, 25, 15, 30, 0);
-		System.out.println(birthDay);
+		executorService.shutdown();
 
-		ZonedDateTime nowInKorea = ZonedDateTime.now(ZoneId.of(("Asia/Seoul")));
-		System.out.println(nowInKorea);
+		ScheduledExecutorService executorService1 = Executors.newSingleThreadScheduledExecutor();
+//		executorService1.schedule(getRunnable("Hello"), 3, TimeUnit.SECONDS);
+		executorService1.scheduleAtFixedRate(getRunnable("Hello"), 1, 2, TimeUnit.SECONDS);
+	}
 
-		ZonedDateTime zonedDateTime1 = instant.atZone(ZoneId.of("Asia/Seoul"));
-		System.out.println(zonedDateTime1);
+	private static Runnable getRunnable(String message) {
+		return () -> {
+			System.out.println(message + Thread.currentThread().getName());
+		};
+	}
 
-		LocalDate today = LocalDate.now();
-		LocalDate thisYearBirthDay = LocalDate.of(2023, Month.JULY, 25);
-		Period period = Period.between(today, thisYearBirthDay);
-		System.out.println(period.getDays());
-
-		Period until = today.until(thisYearBirthDay);
-		System.out.println(until.get(ChronoUnit.DAYS));
-
-		Instant now1 = Instant.now();
-		Instant plus = now1.plus(10, ChronoUnit.SECONDS);
-		Duration between = Duration.between(now1, plus);
-		System.out.println(between.getSeconds());
-
-		DateTimeFormatter MMddyyyy = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-		System.out.println(now.format(MMddyyyy));
-
-		LocalDate parse = LocalDate.parse("07/25/1990", MMddyyyy);
-		System.out.println(parse);
-
-		Date date1 = new Date();
-		Instant instant1 = date1.toInstant();
-		Date newDate = Date.from(instant1);
-
-		GregorianCalendar gregorianCalendar = new GregorianCalendar();
-		LocalDateTime dateTime = gregorianCalendar.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-		ZonedDateTime zonedDateTime2 = gregorianCalendar.toInstant().atZone(ZoneId.systemDefault());
-		GregorianCalendar from = GregorianCalendar.from(zonedDateTime2);
-
-		ZoneId zoneId = TimeZone.getTimeZone("PST").toZoneId();
-		TimeZone timeZone = TimeZone.getTimeZone(zoneId);
-
-		LocalDateTime plus1 = now.plus(10, ChronoUnit.DAYS);
+	static class MyThread extends Thread {
+		@Override
+		public void run() {
+			System.out.println("Thread: " + Thread.currentThread().getName());
+		}
 	}
 }
